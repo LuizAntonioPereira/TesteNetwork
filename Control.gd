@@ -2,6 +2,7 @@ extends VBoxContainer
 
 const port = 3000
 export(int) var user = 4
+var in_value = 0
 
 onready var display = $Status
 onready var input = $LineEdit
@@ -49,7 +50,23 @@ func _server_disconnected():
 func send_message(msg):
 	input.text = ""
 	var id = get_tree().get_network_unique_id()
-	rpc("receive_message", id, msg)
+	if get_tree().is_network_server():
+		#rpc("client_message", id, msg)
+		#rpc_id(1,"calc", id, msg)
+		#rpc("client_message", id, msg)
+		pass
+	else:		
+		rpc_id(1,"calc", id, msg)			
 
-remotesync func receive_message(id, msg):
+remotesync func client_message(id, msg):	
 	display.text += str(id) + ": " + msg + "\n"
+	
+remotesync func calc(id, msg):
+	in_value +=1
+	in_value += float(msg)
+	rpc("client_message",id,str(in_value))
+	#display.text += str(id) + ": " + str(in_value) + "\n"		
+
+
+
+
